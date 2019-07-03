@@ -1,0 +1,11 @@
+D:\projects\c_sharp\Generic_Neural_Network\bin\Debug\netcoreapp2.2\Generic_Neural_Network.deps.json
+D:\projects\c_sharp\Generic_Neural_Network\bin\Debug\netcoreapp2.2\Generic_Neural_Network.runtimeconfig.json
+D:\projects\c_sharp\Generic_Neural_Network\bin\Debug\netcoreapp2.2\Generic_Neural_Network.runtimeconfig.dev.json
+D:\projects\c_sharp\Generic_Neural_Network\bin\Debug\netcoreapp2.2\Generic_Neural_Network.dll
+D:\projects\c_sharp\Generic_Neural_Network\bin\Debug\netcoreapp2.2\Generic_Neural_Network.pdb
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.csprojAssemblyReference.cache
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.csproj.CoreCompileInputs.cache
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.AssemblyInfoInputs.cache
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.AssemblyInfo.cs
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.dll
+D:\projects\c_sharp\Generic_Neural_Network\obj\Debug\netcoreapp2.2\Generic_Neural_Network.pdb
