@@ -7,11 +7,11 @@ namespace mnist{
         #region variables
         int nr_of_layers;
         int[] nr_of_nodes;
-        double learning_rate;
-        matrix[] z;
-        matrix[] a;
+        double learning_rate;        
         matrix[] weights;
         matrix[] bias;
+        matrix[] z;
+        matrix[] a;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace mnist{
             this.nr_of_nodes = nr_of_nodes;
             this.learning_rate = learning_rate;
             this.z = new matrix[nr_of_layers - 1];
-            this.a = new matrix[nr_of_layers - 1];
+            this.a = new matrix[nr_of_layers];
             this.weights = new matrix[nr_of_layers - 1];
             this.bias = new matrix[nr_of_layers -1];
             for (int i = 0; i < nr_of_layers - 1; i++)
@@ -64,17 +64,19 @@ namespace mnist{
         /// <returns>A vector of size (number of nodes in the output layer), containing the results. </returns>
         public double[] FeedForward(double[] input){
             matrix z_ = new matrix(input);
+            a[0] = new matrix(input);
             double[] result = new double[nr_of_nodes[nr_of_nodes.Length - 1]];
             for (int i = 0; i < this.nr_of_layers - 1; i++)
             {
-                z_ = z_ * weights[i];
-                this.z[i] = z_;
-                z_.ApplySigmoid();
-                this.a[i] = z_; 
+                z_ = weights[i].Transpose * a[i] + bias[i].Transpose;
+                a[i+1] = z_;
+                a[i+1].ApplySigmoid();
             }
+            //z[L]
+            //a[L]
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = z_.data[0,i];
+                result[i] = a[nr_of_layers-1].data[i,0];
             }
             return result;
         }
@@ -90,13 +92,19 @@ namespace mnist{
             double[] yHat = FeedForward(x);
             double j;
             double sum = 0;
+            double sum2 = 0;
             
             for (int i = 0; i < y.Length; i++)
             {
                 sum += Math.Pow((y[i] - yHat[i]),2);
             }
-
-            j = learning_rate * sum;
+                        
+            for (int i = 0; i < nr_of_layers; i++)
+            {
+                sum2 += (weights[i] * weights[i]).sum();
+            }
+            
+            j = (0.5 * sum)/x.Length + learning_rate/2 * sum2;
             return j;
         }
 
@@ -121,7 +129,7 @@ namespace mnist{
         /// <param name="x"> The input/s for the neural network.</param>
         /// <param name="y"> The output/s for the neural network.</param>
         /// <returns> </returns>
-        matrix[] CostFunctionPrime(double[] x, double[] y){
+        public matrix[] CostFunctionPrime(double[] x, double[] y){
             double[] yHat = FeedForward(x);
             matrix input = new matrix(x);
             matrix output = new matrix(vector_subtraction(y,yHat));
@@ -150,7 +158,7 @@ namespace mnist{
         }
 
         
-        public void Train(double[] inputs, double[] target, int iterations = 50){
+        public void Train(double[,] inputs, double[] target, int iterations = 50){
             for (int i = 0; i < iterations; i++)
             {
                 for (int j = 0; j < inputs.Length; j++)
