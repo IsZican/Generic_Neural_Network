@@ -49,11 +49,11 @@ namespace mnist{
         /// <summary>
         /// Constructor to create a new Matrix with a given vector;
         /// </summary>
-        public matrix(double[] m) : this(1, m.GetLength(0))
+        public matrix(double[] m) : this(m.GetLength(0), 1)
         {
             for (int j = 0; j < columns; j++)
             {
-                data[0,j] = m[j];
+                data[j,0] = m[j];
             }
         }
 
@@ -170,6 +170,18 @@ namespace mnist{
             return (this.rows == other.rows) && (this.columns == other.columns);
         }
 
+        public double sum(){
+            double sum = 0;
+            for (int i = 0; i < this.rows; i++)
+            {
+                for (int j = 0; j < this.columns; j++)
+                {
+                    sum += this.data[i,j];
+                }
+            }
+            return sum;
+        }
+
         #endregion
 
         #region operations
@@ -194,9 +206,20 @@ namespace mnist{
                 }
                 return output;
             }
+            else if (m1.rows == m2.rows && m2.columns == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i,j] = m1.data[i,j] + m2.data[i,0];
+                    }
+                }
+                return output;
+            }
             else
             {
-                throw new Exception("Cannot add two matrix objects whose dimensions do not match.");
+                throw new Exception("Cannot add two matrix objects whose dimensions do not match. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ")");
             }
         }
         
@@ -257,7 +280,7 @@ namespace mnist{
             }
             else
             {
-                throw new Exception("Multiplication cannot be performed on matrices with these dimensions.");
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ") ");
             }
         }
 
@@ -290,7 +313,7 @@ namespace mnist{
             }
             else
             {
-                throw new Exception("Multiplication cannot be performed on matrices with these dimensions.");
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.GetLength(0) + "," + m1.GetLength(1) + ") and (" + m2.rows + "," + m2.columns + ")");
             }
         }
 
@@ -323,7 +346,7 @@ namespace mnist{
             }
             else
             {
-                throw new Exception("Multiplication cannot be performed on matrices with these dimensions.");
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.rows + "," + m1.columns + ") and (" + m2.GetLength(0) + "," + m2.GetLength(1) + ")");
             }
         }
 
