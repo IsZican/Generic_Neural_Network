@@ -76,11 +76,12 @@ namespace mnist{
             //a[L]
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = a[nr_of_layers-1].data[i,0];
+                result[i] = a[nr_of_layers-1].data[i][0];
             }
             return result;
         }
-
+        
+        #region cosfunction
         /// <summary>
         /// Calculate the cost function.
         /// </summary>
@@ -99,9 +100,9 @@ namespace mnist{
                 sum += Math.Pow((y[i] - yHat[i]),2);
             }
                         
-            for (int i = 0; i < nr_of_layers; i++)
+            for (int i = 0; i < nr_of_layers -1; i++)
             {
-                sum2 += (weights[i] * weights[i]).sum();
+                sum2 += (weights[i] * weights[i].Transpose).sum();
             }
             
             j = (0.5 * sum)/x.Length + learning_rate/2 * sum2;
@@ -156,14 +157,21 @@ namespace mnist{
             }
             return djdw;
         }
+        #endregion
 
+        void error(double[] yhat){
+            double err;
+            err = 1;
+        }
         
-        public void Train(double[,] inputs, double[] target, int iterations = 50){
-            for (int i = 0; i < iterations; i++)
+        public void Train(double[][] x, double[][] y, int epochs = 5){
+            matrix[] delta_a = new matrix[nr_of_layers];
+            for (int i = 0; i < epochs; i++)
             {
-                for (int j = 0; j < inputs.Length; j++)
+                for (int j = 0; j < x.Length; j++)
                 {
-                    ;
+                    CostFunctionPrime(x[0],y[0]);
+                    //delta_a[nr_of_layers - 1] = -(y[j]/a[nr_of_layers - 1]) + (1 - y[j])/(1 - a[nr_of_layers-1]);
                 }
             }
         }

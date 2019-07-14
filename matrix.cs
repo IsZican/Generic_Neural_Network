@@ -13,7 +13,7 @@ namespace mnist{
         /// <summary>
         /// Storage array for the Matrix data.
         /// </summary>
-        public double[,] data;
+        public double[][] data;
 
         Random rand = new Random();
 
@@ -29,19 +29,23 @@ namespace mnist{
         public matrix(int rows,int columns){
             this.rows = rows;
             this.columns = columns;
-            data = new double[rows,columns];
+            data = new double[rows][];
+            for (int i = 0; i < rows; i++)
+            {
+                data[i] = new double[columns];
+            }
         }
 
         /// <summary>
         /// Constructor to create a new Matrix with a given matrix;
         /// </summary>
-        public matrix(double[,] m) : this(m.GetLength(0),m.GetLength(1))
+        public matrix(double[][] m) : this(m.Length,m[0].Length)
         {
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = m[i,j];
+                    data[i][j] = m[i][j];
                 }
             }
         }
@@ -49,11 +53,11 @@ namespace mnist{
         /// <summary>
         /// Constructor to create a new Matrix with a given vector;
         /// </summary>
-        public matrix(double[] m) : this(m.GetLength(0), 1)
+        public matrix(double[] m) : this(m.Length, 1)
         {
             for (int j = 0; j < columns; j++)
             {
-                data[j,0] = m[j];
+                data[j][0] = m[j];
             }
         }
 
@@ -76,7 +80,7 @@ namespace mnist{
                 {
                     for (int j = 0; j < columns; j++)
                     {
-                        t.data[j,i] = data[i,j];
+                        t.data[j][i] = data[i][j];
                     }
                 }
                 return t;
@@ -91,7 +95,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    Console.Write(data[i,j] + " ");
+                    Console.Write(data[i][j] + " ");
                 }
                 Console.WriteLine();
             }
@@ -102,7 +106,7 @@ namespace mnist{
             {
                 for (int j = 0; j < rows; j++)
                 {
-                    Console.Write(Transpose.data[i,j] + " ");
+                    Console.Write(Transpose.data[i][j] + " ");
                 }
                 Console.WriteLine();
             }
@@ -116,7 +120,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = rand.NextDouble() * 2 - 1;
+                    data[i][j] = rand.NextDouble() * 2 - 1;
                 }
             }
         }
@@ -129,7 +133,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = 1;
+                    data[i][j] = 1;
                 }
             }
         }
@@ -142,7 +146,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = 1/(1 + Math.Exp(-data[i,j]));
+                    data[i][j] = 1/(1 + Math.Exp(-data[i][j]));
                 }
             }
         }
@@ -159,7 +163,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = sigmoid(data[i,j])*(1-sigmoid(data[i,j])); 
+                    data[i][j] = sigmoid(data[i][j])*(1-sigmoid(data[i][j])); 
                 }
             }
         }
@@ -180,7 +184,7 @@ namespace mnist{
             {
                 for (int j = 0; j < this.columns; j++)
                 {
-                    sum += this.data[i,j];
+                    sum += this.data[i][j];
                 }
             }
             return sum;
@@ -205,7 +209,7 @@ namespace mnist{
                 {
                     for (int j = 0; j < m1.columns; j++)
                     {
-                        output.data[i,j] = m1.data[i,j] + m2.data[i,j];
+                        output.data[i][j] = m1.data[i][j] + m2.data[i][j];
                     }
                 }
                 return output;
@@ -216,7 +220,7 @@ namespace mnist{
                 {
                     for (int j = 0; j < m1.columns; j++)
                     {
-                        output.data[i,j] = m1.data[i,j] + m2.data[i,0];
+                        output.data[i][j] = m1.data[i][j] + m2.data[i][0];
                     }
                 }
                 return output;
@@ -239,7 +243,7 @@ namespace mnist{
             {
                 for (int j = 0; j < m.columns; j++)
                 {
-                    output.data[i,j] = m.data[i,j] + number;
+                    output.data[i][j] = m.data[i][j] + number;
                 }
             }
             return output;
@@ -271,7 +275,7 @@ namespace mnist{
                 {
                     for (int j = 0; j < m1.columns; j++)
                     {
-                        output.data[i,j] = m1.data[i,j] - m2.data[i,j];
+                        output.data[i][j] = m1.data[i][j] - m2.data[i][j];
                     }
                 }
                 return output;
@@ -282,7 +286,7 @@ namespace mnist{
                 {
                     for (int j = 0; j < m1.columns; j++)
                     {
-                        output.data[i,j] = m1.data[i,j] - m2.data[i,0];
+                        output.data[i][j] = m1.data[i][j] - m2.data[i][0];
                     }
                 }
                 return output;
@@ -305,7 +309,7 @@ namespace mnist{
             {
                 for (int j = 0; j < m.columns; j++)
                 {
-                    output.data[i,j] = m.data[i,j] - number;
+                    output.data[i][j] = m.data[i][j] - number;
                 }
             }
             return output;
@@ -341,9 +345,9 @@ namespace mnist{
                         temp = 0;
                         for (int k = 0; k < m1.columns; k++)
                         {
-                            temp += m1.data[i,k] * m2.data[k,j];
+                            temp += m1.data[i][k] * m2.data[k][j];
                         }
-                        output.data[i,j] = temp;
+                        output.data[i][j] = temp;
                     }
                 }
                 return output;
@@ -362,28 +366,28 @@ namespace mnist{
         /// <returns>An nxp Matrix that is the product of m1 and m2.</returns>
         /// <exception cref="Exception">Thrown when the number of columns in the
         /// first Matrix don't match the number of rows in the second Matrix.</exception>
-        public static matrix operator *(double[,] m1, matrix m2){
-            if (m1.GetLength(1) == m2.rows)
+        public static matrix operator *(double[][] m1, matrix m2){
+            if (m1[0].Length == m2.rows)
             {
-                matrix output = new matrix(m1.GetLength(0), m2.columns);
+                matrix output = new matrix(m1.Length, m2.columns);
                 double temp = 0;
-                for (int i = 0; i < m1.GetLength(0); i++)
+                for (int i = 0; i < m1.Length; i++)
                 {
                     for (int j = 0; j < m2.columns; j++)
                     {
                         temp = 0;
-                        for (int k = 0; k < m1.GetLength(1); k++)
+                        for (int k = 0; k < m1[0].Length; k++)
                         {
-                            temp += m1[i,k] * m2.data[k,j];
+                            temp += m1[i][k] * m2.data[k][j];
                         }
-                        output.data[i,j] = temp;
+                        output.data[i][j] = temp;
                     }
                 }
                 return output;
             }
             else
             {
-                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.GetLength(0) + "," + m1.GetLength(1) + ") and (" + m2.rows + "," + m2.columns + ")");
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.Length + "," + m1[0].Length + ") and (" + m2.rows + "," + m2.columns + ")");
             }
         }
 
@@ -395,28 +399,28 @@ namespace mnist{
         /// <returns>An nxp Matrix that is the product of m1 and m2.</returns>
         /// <exception cref="Exception">Thrown when the number of columns in the
         /// first Matrix don't match the number of rows in the second Matrix.</exception>
-        public static matrix operator *(matrix m1, double[,] m2){
-            if (m1.columns == m2.GetLength(0))
+        public static matrix operator *(matrix m1, double[][] m2){
+            if (m1.columns == m2.Length)
             {
-                matrix output = new matrix(m1.rows, m2.GetLength(1));
+                matrix output = new matrix(m1.rows, m2[0].Length);
                 double temp = 0;
                 for (int i = 0; i < m1.rows; i++)
                 {
-                    for (int j = 0; j < m2.GetLength(1); j++)
+                    for (int j = 0; j < m2[0].Length; j++)
                     {
                         temp = 0;
                         for (int k = 0; k < m1.columns; k++)
                         {
-                            temp += m1.data[i,k] * m2[k,j];
+                            temp += m1.data[i][k] * m2[k][j];
                         }
-                        output.data[i,j] = temp;
+                        output.data[i][j] = temp;
                     }
                 }
                 return output;
             }
             else
             {
-                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.rows + "," + m1.columns + ") and (" + m2.GetLength(0) + "," + m2.GetLength(1) + ")");
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.rows + "," + m1.columns + ") and (" + m2.Length + "," + m2[0].Length + ")");
             }
         }
 
@@ -432,7 +436,7 @@ namespace mnist{
             {
                 for (int j = 0; j < m.columns; j++)
                 {
-                    output.data[i,j] = m.data[i,j] * number;
+                    output.data[i][j] = m.data[i][j] * number;
                 }
             }
             return output;
@@ -450,6 +454,7 @@ namespace mnist{
             return number * m;
         }
         #endregion
+        
     }
 }
 
