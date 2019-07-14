@@ -147,6 +147,10 @@ namespace mnist{
             }
         }
 
+        public static double sigmoid(double z){
+            return 1/(1+Math.Exp(-z));
+        }
+
         /// <summary>
         /// Apply the derivative sigmoid function over each element in data.
         /// </summary>
@@ -155,7 +159,7 @@ namespace mnist{
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i,j] = Math.Exp(-data[i,j])/Math.Pow((1 + Math.Exp(-data[i,j])),2);
+                    data[i,j] = sigmoid(data[i,j])*(1-sigmoid(data[i,j])); 
                 }
             }
         }
@@ -249,6 +253,72 @@ namespace mnist{
         /// <returns>The result of adding the number to each element in a Matrix.</returns>
         public static matrix operator +(matrix m, double number){
             return number + m;
+        }
+
+        /// <summary>
+        /// Subtract two matrices together.
+        /// </summary>
+        /// <param name="m1">The first matrix object to subtract.</param>
+        /// <param name="m2">The second matrix object to subtract.</param>
+        /// <returns>The result of subtracting the two matrices together.</returns>
+        /// <exception cref="Exception">Thrown when both matrices have
+        /// different dimensions.</exception>
+        public static matrix operator -(matrix m1, matrix m2){
+            if (m1.HaveSameDimensions(m2))
+            {
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i,j] = m1.data[i,j] - m2.data[i,j];
+                    }
+                }
+                return output;
+            }
+            else if (m1.rows == m2.rows && m2.columns == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i,j] = m1.data[i,j] - m2.data[i,0];
+                    }
+                }
+                return output;
+            }
+            else
+            {
+                throw new Exception("Cannot add two matrix objects whose dimensions do not match. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ")");
+            }
+        }
+        
+        /// <summary>
+        /// Subtract a number to each element in a Matrix.
+        /// </summary>
+        /// <param name="number">The number to subtract to each element in a Matrix.</param>
+        /// <param name="m">The matrix object to subtract numbers to.</param>
+        /// <returns>The result of subtracting the number to each element in a Matrix.</returns>
+        public static matrix operator -(double number, matrix m){
+            matrix output = new matrix(m.rows, m.columns);
+            for (int i = 0; i < m.rows; i++)
+            {
+                for (int j = 0; j < m.columns; j++)
+                {
+                    output.data[i,j] = m.data[i,j] - number;
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Subtract a number to each element in a Matrix.
+        /// </summary>
+        /// <param name="number">The number to subtract to each element in a Matrix.</param>
+        /// <param name="m">The matrix object to subtract numbers to.</param>
+        /// <returns>The result of subtracting the number to each element in a Matrix.</returns>
+        public static matrix operator -(matrix m, double number){
+            return number - m;
         }
 
         /// <summary>
@@ -388,3 +458,4 @@ namespace mnist{
         /// </summary>
         /// <param name=""> </param>
         /// <returns> </returns>
+        
