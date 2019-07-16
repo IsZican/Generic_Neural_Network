@@ -1,7 +1,7 @@
 using System;
 
 
-namespace mnist{
+namespace generic{
     class neuralNetwork{
         
         #region variables
@@ -62,117 +62,105 @@ namespace mnist{
         /// </summary>
         /// <param name="input"> The input layer vector.</param>
         /// <returns>A vector of size (number of nodes in the output layer), containing the results. </returns>
-        public double[] FeedForward(double[] input){
-            matrix z_ = new matrix(input);
-            a[0] = new matrix(input);
-            double[] result = new double[nr_of_nodes[nr_of_nodes.Length - 1]];
-            for (int i = 0; i < this.nr_of_layers - 1; i++)
+        public matrix FeedForward(double[][] input){
+            matrix result = new matrix(input.Length, nr_of_nodes[nr_of_nodes.Length - 1]);
+            for (int i = 0; i < input.Length; i++)
             {
-                z_ = weights[i].Transpose * a[i] + bias[i].Transpose;
-                a[i+1] = z_;
-                a[i+1].ApplySigmoid();
-            }
-            //z[L]
-            //a[L]
-            for (int i = 0; i < result.Length; i++)
-            {
-                result[i] = a[nr_of_layers-1].data[i][0];
+                matrix z_ = new matrix(input[i]);
+                a[0] = new matrix(input[i]);
+                for (int j = 0; j < this.nr_of_layers - 1; j++)
+                {
+                    z_ = weights[j].Transpose * a[j] + bias[j].Transpose;
+                    a[j+1] = z_;
+                    a[j+1].ApplySigmoid();
+                }
+                //z[L]
+                //a[L]
+                for (int j = 0; j < result.columns; j++)
+                {
+                    result.data[i][j] = a[nr_of_layers - 1].data[j][0];
+                }
             }
             return result;
         }
-        
-        #region cosfunction
+
         /// <summary>
-        /// Calculate the cost function.
+        /// Predict the value of each output node using trained weights of a neural network.
         /// </summary>
-        /// <param name="x"> The input/s for the neural network.</param>
-        /// <param name="y"> The output/s for the neural network.</param>
-        /// <returns> </returns>
-        /// <remarks> yHat is the estimated output.</remarks>
-        double CostFunction(double[] x, double[] y){
-            double[] yHat = FeedForward(x);
-            double j;
+        /// <param name="input"> The input layer vector.</param>
+        /// <returns>A vector of size (number of nodes in the output layer), containing the results. </returns>
+        public matrix FeedForward(double[] input){
+            a[0] = new matrix(input);
+            for (int j = 0; j < this.nr_of_layers - 1; j++)
+            {
+                z[j] = weights[j].Transpose * a[j] + bias[j].Transpose;
+                a[j+1] = z[j];
+                a[j+1].ApplySigmoid();
+            }
+            /*
+            TODO: to add different activation function for last layer.
+            z[L]
+            a[L]
+            */
+            return a[nr_of_layers -1];
+        }
+
+        double CostFunction_L(int layer, int node, matrix target){
+            return (a[layer].data[node][0] * (1 - a[layer].data[node][0]) * (a[layer].data[node][0] - target.data[node][0]));
+        }
+        double CostFunction(int layer, int node, double[][] prev_cost, int prev_nodes){
+            double error = (a[layer].data[node][0] * (1 - a[layer].data[node][0]));
             double sum = 0;
-            double sum2 = 0;
-            
-            for (int i = 0; i < y.Length; i++)
+
+            for (int i = 0; i < prev_nodes; i++)
             {
-                sum += Math.Pow((y[i] - yHat[i]),2);
+                sum += prev_cost[layer + 1][i] * weights[layer].data[node][i];
             }
-                        
-            for (int i = 0; i < nr_of_layers -1; i++)
-            {
-                sum2 += (weights[i] * weights[i].Transpose).sum();
-            }
-            
-            j = (0.5 * sum)/x.Length + learning_rate/2 * sum2;
-            return j;
+            return error * sum;
         }
 
-        /// <summary>
-        /// Subtract 2 vectors and negate the value.
-        /// Used in CostFunctionPrime.
-        /// </summary>
-        /// <param name="y"> First vector.</param>
-        /// <param name="yHat"> Second vector.</param>    
-        /// <returns> The result vector</returns>
-        double[] vector_subtraction(double[] y,double[] yHat){
-            for (int i = 0; i < y.Length; i++)
+        public void Train(double[][] input, double[][] target, int epochs = 5){
+            double[][] cost = new double[nr_of_layers][];
+            double[][] gradients = new double[nr_of_layers][];
+            for (int i = 0; i < nr_of_layers; i++)
             {
-                y[i] = -(y[i] - yHat[i]);
+                cost[i] = new double[nr_of_nodes[i]];
+                gradients[i] = new double[nr_of_nodes[i]];
             }
-            return y;
-        }
+            matrix yHat;
+            matrix y;
 
-        /// <summary>
-        /// Calculate the cost function prime.
-        /// </summary>
-        /// <param name="x"> The input/s for the neural network.</param>
-        /// <param name="y"> The output/s for the neural network.</param>
-        /// <returns> </returns>
-        public matrix[] CostFunctionPrime(double[] x, double[] y){
-            double[] yHat = FeedForward(x);
-            matrix input = new matrix(x);
-            matrix output = new matrix(vector_subtraction(y,yHat));
-            matrix[] djdw = new matrix[nr_of_layers - 1];
-            matrix[] delta = new matrix[nr_of_layers - 1];
-            for (int i = nr_of_layers - 2; i >= 0; i--)
-            {
-                this.z[i].ApplySigmoidPrime();
-                if (i == nr_of_layers - 2)
-                {
-                    delta[i] = output * this.z[i];
-                    djdw[i] = this.a[i].Transpose * delta[i];
-                }
-                else if(i > 0)
-                {
-                    delta[i] = delta[i+1] * this.weights[i+1].Transpose * this.z[i];
-                    djdw[i] = this.a[i].Transpose * delta[i];
-                }
-                else if(i == 0)
-                {
-                    delta[i] = delta[i+1] * this.weights[i+1].Transpose * this.z[i];
-                    djdw[i] = input.Transpose * delta[i];
-                }
-            }
-            return djdw;
-        }
-        #endregion
-
-        void error(double[] yhat){
-            double err;
-            err = 1;
-        }
-        
-        public void Train(double[][] x, double[][] y, int epochs = 5){
-            matrix[] delta_a = new matrix[nr_of_layers];
             for (int i = 0; i < epochs; i++)
             {
-                for (int j = 0; j < x.Length; j++)
+                for (int j = 0; j < input.Length; j++)
                 {
-                    CostFunctionPrime(x[0],y[0]);
-                    //delta_a[nr_of_layers - 1] = -(y[j]/a[nr_of_layers - 1]) + (1 - y[j])/(1 - a[nr_of_layers-1]);
+                    yHat = FeedForward(input[j]);
+                    y = new matrix(target[j]);
+                    
+                    // layers 0,1,2; a has +1
+                    for (int n = 0; n < nr_of_nodes[nr_of_layers - 1]; n++)
+                    {
+                        cost[nr_of_layers - 1][n] = this.CostFunction_L(nr_of_layers - 1, n, y);//2
+                    }
+
+                    for (int l = nr_of_layers - 2; l >= 0; l--)//1
+                    {
+                        for (int n = 0; n < nr_of_nodes[l]; n++)
+                        {
+                            cost[l][n] = this.CostFunction(l, n, cost, nr_of_nodes[l+1]);
+                            //gradients[l][n] =                             
+                        }
+                    }
                 }
+                Console.WriteLine("epoch " + i + " done.");
+            }
+            for (int i = 0; i < cost.Length; i++)
+            {
+                for (int j = 0; j < cost[i].Length; j++)
+                {
+                    Console.Write(cost[i][j] + " ");
+                }
+                Console.WriteLine();
             }
         }
 
