@@ -1,7 +1,7 @@
 using System;
 
 
-namespace mnist{
+namespace generic{
     class matrix
     {
         #region variables
@@ -55,7 +55,7 @@ namespace mnist{
         /// </summary>
         public matrix(double[] m) : this(m.Length, 1)
         {
-            for (int j = 0; j < columns; j++)
+            for (int j = 0; j < rows; j++)
             {
                 data[j][0] = m[j];
             }
@@ -99,6 +99,7 @@ namespace mnist{
                 }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
         public void print_transpose(){
@@ -128,12 +129,12 @@ namespace mnist{
         /// <summary>
         /// Set each element in data to 1.
         /// </summary>
-        public void weights_1(){
+        public void fill_data(double number){
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i][j] = 1;
+                    data[i][j] = number;
                 }
             }
         }
@@ -151,21 +152,51 @@ namespace mnist{
             }
         }
 
-        public static double sigmoid(double z){
+        /// <summary>
+        /// Apply the sigmoid function over z.
+        /// </summary>
+        public static double Sigmoid(double z){
             return 1/(1+Math.Exp(-z));
+        }
+
+        public static matrix Sigmoid(matrix z){
+            matrix result = new matrix(z.rows,z.columns);
+            for (int i = 0; i < z.rows; i++)
+            {
+                for (int j = 0; j < z.columns; j++)
+                {
+                    result.data[i][j] = 1/(1 + Math.Exp(-z.data[i][j]));
+                }
+            }
+            return result;
         }
 
         /// <summary>
         /// Apply the derivative sigmoid function over each element in data.
         /// </summary>
-        public void ApplySigmoidPrime(){
+        public void ApplySigmoidDerivate(){
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    data[i][j] = sigmoid(data[i][j])*(1-sigmoid(data[i][j])); 
+                    data[i][j] = Sigmoid(data[i][j]) * (1 - Sigmoid(data[i][j])); 
                 }
             }
+        }
+        public static double SigmoidDerivate(double z){
+            return Sigmoid(z) * (1 - Sigmoid(z));
+        }
+        
+        public static matrix SigmoidDerivate(matrix z){
+            matrix result = new matrix(z.rows,z.columns);
+            for (int i = 0; i < z.rows; i++)
+            {
+                for (int j = 0; j < z.columns; j++)
+                {
+                    result.data[i][j] = Sigmoid(z.data[i][j]) * (1 - Sigmoid(z.data[i][j]));
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -309,7 +340,7 @@ namespace mnist{
             {
                 for (int j = 0; j < m.columns; j++)
                 {
-                    output.data[i][j] = m.data[i][j] - number;
+                    output.data[i][j] = number - m.data[i][j];
                 }
             }
             return output;
@@ -322,7 +353,15 @@ namespace mnist{
         /// <param name="m">The matrix object to subtract numbers to.</param>
         /// <returns>The result of subtracting the number to each element in a Matrix.</returns>
         public static matrix operator -(matrix m, double number){
-            return number - m;
+            matrix output = new matrix(m.rows, m.columns);
+            for (int i = 0; i < m.rows; i++)
+            {
+                for (int j = 0; j < m.columns; j++)
+                {
+                    output.data[i][j] = m.data[i][j] - number;
+                }
+            }
+            return output;
         }
 
         /// <summary>
