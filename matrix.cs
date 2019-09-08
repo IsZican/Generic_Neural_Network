@@ -53,11 +53,11 @@ namespace generic{
         /// <summary>
         /// Constructor to create a new Matrix with a given vector;
         /// </summary>
-        public matrix(double[] m) : this(m.Length, 1)
+        public matrix(double[] m) : this(1,m.Length)
         {
             for (int j = 0; j < rows; j++)
             {
-                data[j][0] = m[j];
+                data[0][j] = m[j];
             }
         }
 
@@ -111,6 +111,7 @@ namespace generic{
                 }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -124,6 +125,18 @@ namespace generic{
                     data[i][j] = rand.NextDouble() * 2 - 1;
                 }
             }
+        }
+
+        public void size(){
+            Console.WriteLine(rows + " , " + columns);
+        }
+
+        public static void size(double[][] x){
+            Console.WriteLine(x.Length + " , " + x[0].Length);
+        }
+
+        public static void size(double[] x){
+            Console.WriteLine(x.Length);
         }
 
         /// <summary>
@@ -221,6 +234,21 @@ namespace generic{
             return sum;
         }
 
+        /// <summary>
+        /// Sums all alements in matrix.
+        /// </summary>
+        public static double sum(matrix x){
+            double sum = 0;
+            for (int i = 0; i < x.rows; i++)
+            {
+                for (int j = 0; j < x.columns; j++)
+                {
+                    sum += x.data[i][j];
+                }
+            }
+            return sum;
+        }
+
         #endregion
 
         #region operations
@@ -256,6 +284,17 @@ namespace generic{
                 }
                 return output;
             }
+            else if (m1.columns == m2.columns && m2.rows == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i][j] = m1.data[i][j] + m2.data[0][j];
+                    }
+                }
+                return output;
+            }
             else
             {
                 throw new Exception("Cannot add two matrix objects whose dimensions do not match. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ")");
@@ -280,12 +319,6 @@ namespace generic{
             return output;
         }
 
-        /// <summary>
-        /// Add a number to each element in a Matrix.
-        /// </summary>
-        /// <param name="number">The number to add to each element in a Matrix.</param>
-        /// <param name="m">The matrix object to add numbers to.</param>
-        /// <returns>The result of adding the number to each element in a Matrix.</returns>
         public static matrix operator +(matrix m, double number){
             return number + m;
         }
@@ -322,6 +355,17 @@ namespace generic{
                 }
                 return output;
             }
+            else if (m1.columns == m2.columns && m2.rows == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i][j] = m1.data[i][j] - m2.data[0][j];
+                    }
+                }
+                return output;
+            }
             else
             {
                 throw new Exception("Cannot add two matrix objects whose dimensions do not match. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ")");
@@ -346,12 +390,6 @@ namespace generic{
             return output;
         }
 
-        /// <summary>
-        /// Subtract a number to each element in a Matrix.
-        /// </summary>
-        /// <param name="number">The number to subtract to each element in a Matrix.</param>
-        /// <param name="m">The matrix object to subtract numbers to.</param>
-        /// <returns>The result of subtracting the number to each element in a Matrix.</returns>
         public static matrix operator -(matrix m, double number){
             matrix output = new matrix(m.rows, m.columns);
             for (int i = 0; i < m.rows; i++)
@@ -491,6 +529,77 @@ namespace generic{
         {
             // Same as above, but ensuring commutativity - i.e. (s * m) == (m * s).
             return number * m;
+        }
+
+        /// <summary>
+        /// Multiply element wise two matrices together.
+        /// </summary>
+        /// <param name="m1">An nxm dimension matrix object.</param>
+        /// <param name="m2">An mxp dimension matrix object.</param>
+        /// <returns>An nxm Matrix that is the product of m1 and m2.</returns>
+        /// <exception cref="Exception">Thrown when the number of columns and rows in the
+        /// first Matrix don't match the number of columns and rows in the second Matrix.</exception>
+        public static matrix elementWiseMultiplication(matrix m1, matrix m2){
+            if (m1.HaveSameDimensions(m2))
+            {
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i][j] = m1.data[i][j] * m2.data[i][j];
+                    }
+                }
+                return output;
+            }
+            else if (m1.rows == m2.rows && m2.columns == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i][j] = m1.data[i][j] * m2.data[i][0];
+                    }
+                }
+                return output;
+            }
+            else if (m1.columns == m2.columns && m2.rows == 1){
+                matrix output = new matrix(m1.rows, m1.columns);
+                for (int i = 0; i < m1.rows; i++)
+                {
+                    for (int j = 0; j < m1.columns; j++)
+                    {
+                        output.data[i][j] = m1.data[i][j] * m2.data[0][j];
+                    }
+                }
+                return output;
+            }
+            else
+            {
+                throw new Exception("Multiplication cannot be performed on matrices with these dimensions. (" + m1.rows + "," + m1.columns + ") and (" + m2.rows + "," + m2.columns + ") ");
+            }
+        }
+
+        /// <summary>
+        /// Perform an element wise raise to the given matrix.
+        /// </summary>
+        /// <param name="m1">An nxm dimension matrix object. </param>
+        /// <param name="nr">The power .</param>
+        /// <returns>An nxm Matrix that is the result of raising m1 to the power nr. </returns>
+        public static matrix operator^(matrix m1, double nr){
+            double temp = 0;
+            for (int i = 0; i < m1.rows; i++)
+            {
+                for (int j = 0; j < m1.columns; j++)
+                {
+                    temp = m1.data[i][j];
+                    for (int k = 1; k < nr; k++)
+                    {
+                        m1.data[i][j] = m1.data[i][j] * temp;
+                    }
+                }
+            }
+            return m1;
         }
         #endregion
         
